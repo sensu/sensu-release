@@ -9,7 +9,7 @@ readonly PYTHON="${PYTHON:-/usr/bin/python}"
 readonly SUDO="${SUDO:-/usr/bin/sudo}"
 readonly TAR="${TAR:-/bin/tar}"
 
-readonly AWSCLI_INSTALL_DIR="/awscli-install"
+readonly AWSCLI_INSTALL_DIR="$HOME/awscli-install"
 readonly AWSCLI_VER="awscli-1.14.50"
 
 readonly SETUP_CFG_EDIT="
