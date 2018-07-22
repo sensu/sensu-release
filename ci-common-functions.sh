@@ -7,14 +7,16 @@
 # printed to the console when shell execution tracing (-x) is turned on.
 # Most of the CI scripts will "set -x" if "$ENABLE_DEBUG_BUILD_ENV" is set.
 
-__current_shell_flags=""
+__original_shell_flags=""
 
 function disable_execution_tracing() {
-   __current_shell_flags="$-"
+   __original_shell_flags="$-"
    set +x
 }
 
 function reenable_execution_tracing() {
-   [[ "$__current_shell_flags" =~ "x" ]] && set -x
+   if [[ "$__original_shell_flags" =~ "x" ]]; then
+      set -x
+   fi
 }
 
