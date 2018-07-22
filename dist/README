@@ -1,0 +1,11 @@
+
+This directory contains source copies of some small utilities we use to 
+communicate with the outside world.
+
+The reason we keep a copy of these utilities in the tree is to reduce the chance
+that installing them via the network will timeout and/or otherwise fail; we want
+to be able to communicate build status (externally from the CI provider) as
+early as possible, so, in effect, as long as we've been able to clone the two
+sensu repos (sensu-go and sensu-release), we hopefully should be able to "call
+out" to the world, without depending on any third parties (other than Amazon,
+of course!)
