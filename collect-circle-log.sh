@@ -24,16 +24,20 @@
 set -e
 test -n "$DEBUG" && set -x
 
-. ci-functions.sh
-
-readonly CIRCLE_LOG_HOME="$HOME/build-log"
+readonly CIRCLE_LOG_HOME="${CIRCLE_LOG_HOME:-$HOME/circle-build-log}"
 
 SLEEP_COUNT=10
 
 echo "Sleeping $SLEEP_COUNT seconds to let the Circle log propagate through the API before we download it..."
 sleep $SLEEP_COUNT
 
-dest_dir=.
+dest_dir="$1"
+
+if [[ -z "$dest_dir" ]]; then
+    echo "Usage: $0 [ log output directory ]" >&2
+    exit 1
+fi
+
 test -d "$dest_dir" || mkdir -pv "$dest_dir"
 
 echo "Storing Circle CI log from this run in ${dest_dir}..."
@@ -49,11 +53,19 @@ job_info="$CIRCLE_LOG_HOME/job.json"
 # start collecting logs from that point, not re-collect _all_ the logs_
 
 shell_flags="$-"
-      
+
+#
+# NOTE: these curl calls currently work without setting a CIRCLE_CI_API_TOKEN
+# (i.e. we don't set it in the environment) because the sensu-go repo is a
+# public repo; this script _will_ work with other (private) sensu repos, but
+# that API token will need to be set (via secure variables); see
+# https://circleci.com/docs/2.0/managing-api-tokens/
+#
+
 set +x
 curl -sSLf \
      -u ${CIRCLE_CI_API_TOKEN}: \
-     https://circleci.com/api/v1.1/project/bitbucket/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/$CIRCLE_BUILD_NUM > $job_info
+     https://circleci.com/api/v1.1/project/github/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/$CIRCLE_BUILD_NUM > $job_info
 if [[ "$_shell_flags" =~ "x" ]]; then
    set -x
 fi
@@ -70,7 +82,7 @@ for step in $stepNumbers; do
    # https://circleci.com/docs/api/v1-reference/#authentication
    curl -sSLf \
       -u ${CIRCLE_CI_API_TOKEN}: \
-      https://circleci.com/api/v1.1/project/bitbucket/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BUILD_NUM}/output/${step}/0?file=true > $log_file_part
+      https://circleci.com/api/v1.1/project/github/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BUILD_NUM}/output/${step}/0?file=true > $log_file_part
    curlRv="$?"
    set -e
    if [[ "$_shell_flags" =~ "x" ]]; then
