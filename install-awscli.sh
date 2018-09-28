@@ -17,6 +17,17 @@ readonly SETUP_CFG_EDIT="
 find_links = $SENSU_RELEASE_REPO/dist/${AWSCLI_VER}-deps
 "
 
+# This test can fail...
+set +e
+$PYTHON -c "import setuptools"
+setuptools_test="$?"
+set -e
+
+if [[ "$setuptools_test" -ne "0" ]]; then
+    $SUDO apt-get install python-setuptools
+fi
+
+
 $MKDIR -p $AWSCLI_INSTALL_DIR
 cd $AWSCLI_INSTALL_DIR
 $TAR xfvz $SENSU_RELEASE_REPO/dist/${AWSCLI_VER}.tar.gz
