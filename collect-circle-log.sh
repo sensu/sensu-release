@@ -21,6 +21,11 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 
+function usage() {
+    echo "Usage: $0 [ log_output_directory ] [ log_file_name ]" >&2
+    echo "If log_file_name is empty, it defaults to log.txt" >&2
+}
+
 set -e
 test -n "$DEBUG" && set -x
 
@@ -32,11 +37,18 @@ echo "Sleeping $SLEEP_COUNT seconds to let the Circle log propagate through the 
 sleep $SLEEP_COUNT
 
 dest_dir="$1"
+log_file_name="log.txt"
 
 if [[ -z "$dest_dir" ]]; then
-    echo "Usage: $0 [ log output directory ]" >&2
+    usage
     exit 1
 fi
+
+if [[ -n "$2" ]]; then
+    log_file_name="$2"
+fi
+
+log_file_dest="${dest_dir}/${log_file_name}"
 
 test -d "$dest_dir" || mkdir -pv "$dest_dir"
 
@@ -44,7 +56,6 @@ echo "Storing Circle CI log from this run in ${dest_dir}..."
 
 mkdir -p $CIRCLE_LOG_HOME
 
-log_file="${dest_dir}/log.txt"
 log_file_part="$CIRCLE_LOG_HOME/log-part.txt"
 job_info="$CIRCLE_LOG_HOME/job.json"
 
@@ -92,16 +103,16 @@ for step in $stepNumbers; do
    if [ "$curlRv" -ne "0" ]; then
       error_str="MISSING LOG PART FOR STEP $step"
       echo "$error_str" >&2
-      echo "$error_str" >> $log_file
+      echo "$error_str" >> $log_file_dest
    fi
 
-   echo "=============" >> $log_file
-   echo -n "LOG PART " >> $log_file
-   echo "$(printf '%02d:' "$step")" >> $log_file
+   echo "=============" >> $log_file_dest
+   echo -n "LOG PART " >> $log_file_dest
+   echo "$(printf '%02d:' "$step")" >> $log_file_dest
 
-   cat $log_file_part >> $log_file
+   cat $log_file_part >> $log_file_dest
    # Add a last new line, in case the log part doesn't have one in it
-   echo >> $log_file
+   echo >> $log_file_dest
 
    sleep 1
 done
