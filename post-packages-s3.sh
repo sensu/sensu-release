@@ -12,7 +12,7 @@ readonly AWSCLI="${AWSCLI:-/usr/local/bin/aws}"
 readonly GIT="${GIT:-/usr/bin/git}"
 readonly SED="${SED:-/bin/sed}"
 
-readonly AWS_S3_SENSU_CI_BUILDS_BUCKET="s3://sensu-ci-builds"
+readonly AWS_S3_SENSU_CI_BUILDS_BUCKET="sensu-ci-builds"
 
 if [[ -z "$1" ]]; then
    echo "Usage: $0 [ deliverables directory ]" >&2
@@ -37,9 +37,9 @@ $AWSCLI \
    --recursive \
    --acl public-read \
    $deliverables_dir \
-   $AWS_S3_SENSU_CI_BUILDS_BUCKET/$git_branch_no_slashes/$build_date
+   s3://$AWS_S3_SENSU_CI_BUILDS_BUCKET/$git_branch_no_slashes/$build_date
 
-uploaded_build_artifacts="$($AWSCLI s3 ls --recursive $AWS_S3_SENSU_CI_BUILDS_BUCKET/$git_branch_no_slashes/$build_date | $AWK '{print $4}')"
+uploaded_build_artifacts="$($AWSCLI s3 ls --recursive s3://$AWS_S3_SENSU_CI_BUILDS_BUCKET/$git_branch_no_slashes/$build_date | $AWK '{print $4}')"
 
 for obj in $uploaded_build_artifacts; do
    echo "Tagging $obj for artifact garbage collection..."
