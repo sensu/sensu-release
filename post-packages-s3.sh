@@ -7,11 +7,12 @@ readonly SCRIPT_DIR="$(dirname "$0")"
 . $SCRIPT_DIR/ci-common-functions.sh
 
 # The aws command is in awscli, because we install it ourselves.
+readonly AWK="${AWK:-/usr/bin/awk}"
 readonly AWSCLI="${AWSCLI:-/usr/local/bin/aws}"
 readonly GIT="${GIT:-/usr/bin/git}"
 readonly SED="${SED:-/bin/sed}"
 
-readonly AWS_S3_SENSU_CI_BUILDS_BUCKET="s3://sensu-ci-builds"
+readonly AWS_S3_SENSU_CI_BUILDS_BUCKET="sensu-ci-builds"
 
 if [[ -z "$1" ]]; then
    echo "Usage: $0 [ deliverables directory ]" >&2
@@ -35,7 +36,24 @@ $AWSCLI \
    cp \
    --recursive \
    --acl public-read \
-   --metadata garbage-collect=1 \
    $deliverables_dir \
-   $AWS_S3_SENSU_CI_BUILDS_BUCKET/$git_branch_no_slashes/$build_date
+   s3://$AWS_S3_SENSU_CI_BUILDS_BUCKET/$git_branch_no_slashes/$build_date
+
+uploaded_build_artifacts="$($AWSCLI s3 ls --recursive s3://$AWS_S3_SENSU_CI_BUILDS_BUCKET/$git_branch_no_slashes/$build_date | $AWK '{print $4}')"
+
+for obj in $uploaded_build_artifacts; do
+   echo "Tagging $obj for artifact garbage collection..."
+   $AWSCLI s3api put-object-tagging --bucket $AWS_S3_SENSU_CI_BUILDS_BUCKET \
+     --key "$obj" \
+     --tagging '{
+                  "TagSet": [
+                     {
+                       "Key": "garbage-collect",
+                       "Value": "1"
+                      }
+                   ]
+                }'
+
+   sleep 1
+done
 
