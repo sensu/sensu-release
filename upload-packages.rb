@@ -42,27 +42,14 @@ PACKAGE_TYPES = [
   "rpm"
 ]
 
-# every deb & rpm distro/version supported by packagecloud.io (last updated 2018-10-24)
+# Before adding a new platform, please see https://packagecloud.io/docs#os_distro_version
+# for a list of all platforms that packagecloud supports. Be sure to verify which service
+# manager the platform uses (e.g. sysvinit, systemd)
 PACKAGECLOUD_PLATFORMS = {
   :linux => {
     :deb => {
       :sysvinit => {
         :ubuntu => [
-          # "warty",
-          # "hoary",
-          # "breezy",
-          # "dapper",
-          # "edgy",
-          # "feisty",
-          # "gutsy",
-          # "hardy",
-          # "intrepid",
-          # "jaunty",
-          # "karmic",
-          # "lucid",
-          # "maverick",
-          # "natty",
-          # "oneiric",
           "precise",
           "quantal",
           "raring",
@@ -75,21 +62,6 @@ PACKAGECLOUD_PLATFORMS = {
           "lenny",
           "squeeze",
           "wheezy"
-        ],
-        :raspbian => [
-          # "wheezy"
-        ],
-        :elementaryos => [
-          # "jupiter",
-          # "luna",
-          # "freya"
-        ],
-        :linuxmint => [
-          # "petra",
-          # "qiana",
-          # "rebecca",
-          # "rafaela",
-          # "rosa"
         ]
       },
       :systemd => {
@@ -106,21 +78,6 @@ PACKAGECLOUD_PLATFORMS = {
           "jessie",
           "stretch",
           "buster"
-        ],
-        :raspbian => [
-          # "jessie",
-          # "stretch",
-          # "buster"
-        ],
-        :elementaryos => [
-          # "loki"
-        ],
-        :linuxmint => [
-          # "sarah",
-          # "serena",
-          # "sonya",
-          # "sylvia",
-          # "tara"
         ]
       }
     },
@@ -140,13 +97,6 @@ PACKAGECLOUD_PLATFORMS = {
         ],
         :sles => [
           "11.4"
-        ],
-        :fedora => [
-          "14"
-        ],
-        :poky => [
-          # "jethro",
-          # "krogoth"
         ]
       },
       :systemd => {
@@ -174,15 +124,6 @@ PACKAGECLOUD_PLATFORMS = {
           "42.3"
         ],
         :fedora => [
-          # "15",
-          # "16",
-          # "17",
-          # "18",
-          # "19",
-          # "20",
-          # "21",
-          # "22",
-          # "23",
           "24",
           "25",
           "26",
