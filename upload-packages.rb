@@ -31,7 +31,6 @@ def deep_merge(hash_one, hash_two)
 end
 
 REQUIRED_ENV_VARS = [
-  "AWS_REGION",
   "AWS_ACCESS_KEY_ID",
   "AWS_SECRET_ACCESS_KEY",
   "PACKAGECLOUD_USER",
@@ -251,7 +250,7 @@ cli.parse_options
 check_env_vars
 
 # connect to Amazon S3
-@s3 ||= Aws::S3::Client.new(:region => ENV["AWS_REGION"])
+@s3 ||= Aws::S3::Client.new()
 
 # connect to packagecloud
 credentials = Packagecloud::Credentials.new(ENV["PACKAGECLOUD_USER"], ENV["PACKAGECLOUD_TOKEN"])
