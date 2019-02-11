@@ -31,8 +31,11 @@ fi
 
 git_branch="$(cd $git_repo && $GIT rev-parse --abbrev-ref HEAD)"
 git_branch_no_slashes="$(echo "$git_branch" | $SED -e 's:/:_:g')"
+git_sha="$(cd $git_repo && $GIT rev-parse HEAD)"
 
 build_date="$(cd $git_repo && TZ='America/Los_Angeles' $GIT log -1 --format='%cd' --date=format:'%Y%m%d-%H%M' HEAD)"
+bucket_dir="$build_date"
+bucket_dir+="_$git_sha"
 
 disable_execution_tracing
 export AWS_ACCESS_KEY_ID="$AWS_S3_SENSU_CI_BUILDS_ACCESS_KEY"
@@ -45,9 +48,9 @@ $AWSCLI \
    --recursive \
    --acl public-read \
    $deliverables_dir \
-   s3://$AWS_S3_SENSU_CI_BUILDS_BUCKET/$git_branch_no_slashes/$build_date
+   s3://$AWS_S3_SENSU_CI_BUILDS_BUCKET/$git_branch_no_slashes/$bucket_dir
 
-uploaded_build_artifacts="$($AWSCLI s3 ls --recursive s3://$AWS_S3_SENSU_CI_BUILDS_BUCKET/$git_branch_no_slashes/$build_date | $AWK '{print $4}')"
+uploaded_build_artifacts="$($AWSCLI s3 ls --recursive s3://$AWS_S3_SENSU_CI_BUILDS_BUCKET/$git_branch_no_slashes/$bucket_dir | $AWK '{print $4}')"
 
 for obj in $uploaded_build_artifacts; do
    echo "Tagging $obj for artifact garbage collection..."
