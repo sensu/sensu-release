@@ -16,10 +16,10 @@ RUN INSTALL_PKGS="${SYSTEM_PKGS} ${PYTHON_PKGS}" && \
   yum -y clean all --enablerepo='*'
 
 # Add circleci user
-RUN useradd --uid=3434 --user-group --create-home circleci && \
-  echo 'circleci ALL=NOPASSWD: ALL' >> /etc/sudoers.d/50-circleci && \
-  echo 'Defaults    env_keep += "DEBIAN_FRONTEND"' >> /etc/sudoers.d/env_keep && \
-  sudo -u circleci mkdir /home/circleci/project
+RUN useradd --uid=3434 --user-group --create-home circleci
+RUN echo 'circleci ALL=NOPASSWD: ALL' >> /etc/sudoers.d/50-circleci
+RUN echo 'Defaults    env_keep += "DEBIAN_FRONTEND"' >> /etc/sudoers.d/env_keep
+RUN sudo -u circleci mkdir /home/circleci/project
 
 # Create directories
 ENV ARTIFACTS_PATH="/artifacts"
