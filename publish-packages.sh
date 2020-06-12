@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # $ publish-packages.sh sha branch semver
 # $ publish-packages.sh 39d2bf22c416f9a78f22c4817dc74ab62d7f4d63 release/5.11 5.11.1
