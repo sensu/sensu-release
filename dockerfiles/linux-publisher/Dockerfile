@@ -2,9 +2,11 @@ FROM alpine:3.12.0
 MAINTAINER Sensu Engineering <engineering@sensu.io>
 
 ENV ARTIFACTS_PATH="/artifacts"
+ENV LOGS_PATH="${ARTIFACTS_PATH}/logs"
 ENV TOOLS_PATH="/tools"
 
 RUN mkdir -p $ARTIFACTS_PATH
+RUN mkdir -p $LOGS_PATH
 RUN mkdir -p $TOOLS_PATH
 
 # Copy sensu-release tools to /tools
