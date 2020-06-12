@@ -5,11 +5,13 @@ LABEL name="sensu/sensu-release" \
       maintainer="engineering@sensu.io"
 
 ENV OBJ_PATH="/obj"
-ENV ARTIFACTS_PATH="/artifacts"
+ENV WORKSPACE_PATH="/workspace"
+ENV ARTIFACTS_PATH="${WORKSPACE_PATH}/artifacts"
 ENV VAR_TMP_PATH="/var/tmp"
 ENV RPM_LIB_PATH="/var/lib/rpm"
 
 RUN mkdir -p $OBJ_PATH
+RUN mkdir -p $WORKSPACE_PATH
 RUN mkdir -p $ARTIFACTS_PATH
 RUN mkdir -p $VAR_TMP_PATH
 RUN mkdir -p $RPM_LIB_PATH
@@ -46,6 +48,7 @@ RUN echo 'Defaults    env_keep += "DEBIAN_FRONTEND"' >> /etc/sudoers.d/env_keep
 RUN sudo -u circleci mkdir /home/circleci/project
 
 # Fix ownership
+RUN chown -R circleci:circleci $WORKSPACE_PATH
 RUN chown -R circleci:circleci $ARTIFACTS_PATH
 RUN chown -R circleci:circleci $OBJ_PATH
 RUN chown -R circleci:circleci $VAR_TMP_PATH

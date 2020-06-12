@@ -260,7 +260,8 @@ func executeFetchLogs(cmd *cobra.Command, args []string) {
 		for _, action := range step.Actions {
 			stepOutputs, err := fetcher.FetchStepOutputs(jobNumber, action.StepNumber)
 			if err != nil {
-				// no-op for now
+				fmt.Fprintf(os.Stderr, "error fetching output for step \"%d\" in job \"\"", action.StepNumber, jobNumber)
+				continue
 			}
 			stepStr := fmt.Sprintf("  Step: %s\n", step.Name)
 			logFile.WriteString(jobStepSeparator)

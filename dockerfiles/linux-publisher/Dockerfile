@@ -3,10 +3,12 @@ FROM alpine:3.12.0
 LABEL name="sensu/sensu-release" \
       maintainer="engineering@sensu.io"
 
-ENV ARTIFACTS_PATH="/artifacts"
+ENV WORKSPACE_PATH="/workspace"
+ENV ARTIFACTS_PATH="${WORKSPACE_PATH}/artifacts"
 ENV LOGS_PATH="${ARTIFACTS_PATH}/logs"
 ENV TOOLS_PATH="/tools"
 
+RUN mkdir -p $WORKSPACE_PATH
 RUN mkdir -p $ARTIFACTS_PATH
 RUN mkdir -p $LOGS_PATH
 RUN mkdir -p $TOOLS_PATH
@@ -38,7 +40,9 @@ RUN echo 'Defaults    env_keep += "DEBIAN_FRONTEND"' >> /etc/sudoers.d/env_keep
 RUN sudo -u circleci mkdir /home/circleci/project
 
 # Fix ownership
+RUN chown -R circleci:circleci $WORKSPACE_PATH
 RUN chown -R circleci:circleci $ARTIFACTS_PATH
+RUN chown -R circleci:circleci $LOGS_PATH
 RUN chown -R circleci:circleci $TOOLS_PATH
 
 USER circleci
