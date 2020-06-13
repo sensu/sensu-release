@@ -20,6 +20,9 @@ RUN INSTALL_PKGS="${SYSTEM_PKGS} ${PYTHON_PKGS}" && \
   rpm -V $INSTALL_PKGS && \
   yum -y clean all --enablerepo='*'
 
+ENV GO111MODULE="on"
+ENV GOPROXY="https://proxy.golang.org"
+
 # Install goreleaser
 RUN rpm -Uvh "https://github.com/goreleaser/goreleaser/releases/download/v0.136.0/goreleaser_amd64.rpm"
 

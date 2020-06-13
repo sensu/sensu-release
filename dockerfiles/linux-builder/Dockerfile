@@ -25,6 +25,8 @@ RUN apk add --no-cache $BUILD_TIME_PKGS $RUN_TIME_PKGS
 # Install go
 COPY --from=golang /usr/local/go /usr/local/go
 ENV PATH="/usr/local/go/bin:$PATH"
+ENV GO111MODULE="on"
+ENV GOPROXY="https://proxy.golang.org"
 
 # Install goreleaser
 RUN curl -Lo /tmp/goreleaser.tar.gz https://github.com/goreleaser/goreleaser/releases/download/v0.136.0/goreleaser_Linux_x86_64.tar.gz

@@ -19,6 +19,8 @@ ENV RUN_TIME_PKGS="openssh-client git bash sudo"
 RUN apk add --no-cache $BUILD_TIME_PKGS $RUN_TIME_PKGS
 
 # Build tools
+ENV GO111MODULE="on"
+ENV GOPROXY="https://proxy.golang.org"
 RUN cd $TOOLS_PATH && go build ./cmd/packagecloudpruner
 
 # Cleanup
