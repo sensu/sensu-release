@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 set -e
 test -n "$DEBUG_BUILD_ENV" && set -x
@@ -8,8 +8,7 @@ readonly SCRIPT_DIR="$(dirname "$0")"
 
 # The aws command is in awscli, because we install it ourselves.
 readonly AWK="${AWK:-/usr/bin/awk}"
-readonly AWSCLI="${AWSCLI:-/usr/local/bin/aws}"
-readonly GIT="${GIT:-/usr/bin/git}"
+readonly AWSCLI="${AWSCLI:-/usr/bin/aws}"
 readonly SED="${SED:-/bin/sed}"
 
 readonly AWS_S3_SENSU_CI_BUILDS_BUCKET="sensu-ci-builds"
@@ -29,11 +28,11 @@ else
    readonly git_repo="$deliverables_dir"
 fi
 
-git_branch="$(cd $git_repo && $GIT rev-parse --abbrev-ref HEAD)"
+git_branch="$CIRCLE_BRANCH"
 git_branch_no_slashes="$(echo "$git_branch" | $SED -e 's:/:_:g')"
-git_sha="$(cd $git_repo && $GIT rev-parse HEAD)"
+git_sha="$CIRCLE_SHA1"
 
-build_date="$(cd $git_repo && TZ='America/Los_Angeles' $GIT log -1 --format='%cd' --date=format:'%Y%m%d-%H%M' HEAD)"
+build_date="$COMMIT_DATE"
 bucket_dir="$build_date"
 bucket_dir+="_$git_sha"
 
