@@ -45,7 +45,7 @@ func executeFetchAllLogs(cmd *cobra.Command, args []string) error {
 			for _, action := range step.Actions {
 				stepOutputs, err := fetcher.FetchStepOutputs(jobNumber, action.StepNumber)
 				if err != nil {
-					fmt.Fprintf(os.Stderr, "error fetching output for step \"%d\" in job \"\"", action.StepNumber, jobNumber)
+					fmt.Fprintf(os.Stderr, "error fetching output for step \"%d\" in job \"%d\"", action.StepNumber, jobNumber)
 					continue
 				}
 				stepStr := fmt.Sprintf("  Step: %s\n", step.Name)
