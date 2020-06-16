@@ -74,15 +74,6 @@ var (
 	rootCmd = newRootCmd()
 )
 
-func er(msg interface{}) {
-	fmt.Println("error:", msg)
-	os.Exit(1)
-}
-
-func appendNewline(s string) string {
-	return fmt.Sprintf("%s\n", s)
-}
-
 func initCobra() {
 	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
 	postInitCommands(rootCmd.Commands())
@@ -196,6 +187,7 @@ func newRootCmd() *cobra.Command {
 func main() {
 	cobra.OnInitialize(initCobra)
 	if err := rootCmd.Execute(); err != nil {
-		er(err)
+		fmt.Println("error:", err)
+		os.Exit(1)
 	}
 }

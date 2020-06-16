@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func executeFetchAllLogs(cmd *cobra.Command, args []string) {
+func executeFetchAllLogs(cmd *cobra.Command, args []string) error {
 	fetcher := Fetcher{
 		apiToken:        viper.GetString(flagAuthToken),
 		workflowID:      viper.GetString(flagWorkflowID),
@@ -21,7 +21,7 @@ func executeFetchAllLogs(cmd *cobra.Command, args []string) {
 
 	workflowJobs, err := fetcher.FetchWorkflowJobs()
 	if err != nil {
-		er(err)
+		return err
 	}
 
 	var jobNumber int64
@@ -32,13 +32,13 @@ func executeFetchAllLogs(cmd *cobra.Command, args []string) {
 		logPath := filepath.Join(fetcher.outputDir, logName)
 		logFile, err := os.Create(logPath)
 		if err != nil {
-			er(err)
+			return err
 		}
 		defer logFile.Close()
 
 		job, err := fetcher.FetchJob(jobNumber)
 		if err != nil {
-			er(err)
+			return err
 		}
 
 		for _, step := range job.Steps {
@@ -63,14 +63,14 @@ func executeFetchAllLogs(cmd *cobra.Command, args []string) {
 		}
 	}
 
-	return
+	return nil
 }
 
 func newFetchAllCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "fetch-all",
 		Short: "fetch logs for all jobs for a given workflow",
-		Run:   executeFetchAllLogs,
+		RunE:  executeFetchAllLogs,
 	}
 
 	cmd.Flags().StringP(flagWorkflowID, "w", "", "id of the workflow that the job belongs to")

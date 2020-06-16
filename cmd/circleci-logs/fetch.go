@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func executeFetchLogs(cmd *cobra.Command, args []string) {
+func executeFetchLogs(cmd *cobra.Command, args []string) error {
 	fetcher := Fetcher{
 		apiToken:        viper.GetString(flagAuthToken),
 		workflowID:      viper.GetString(flagWorkflowID),
@@ -21,13 +21,13 @@ func executeFetchLogs(cmd *cobra.Command, args []string) {
 
 	logFile, err := os.Create(fetcher.outputPath)
 	if err != nil {
-		er(err)
+		return err
 	}
 	defer logFile.Close()
 
 	workflowJobs, err := fetcher.FetchWorkflowJobs()
 	if err != nil {
-		er(err)
+		return err
 	}
 
 	var jobNumber int64
@@ -39,12 +39,13 @@ func executeFetchLogs(cmd *cobra.Command, args []string) {
 	}
 
 	if jobNumber == 0 {
-		er(fmt.Errorf("a job with the name \"%s\" was not found in workflow \"%s\"", fetcher.jobName, fetcher.workflowID))
+		return fmt.Errorf("a job with the name \"%s\" was not found in workflow \"%s\"",
+			fetcher.jobName, fetcher.workflowID)
 	}
 
 	job, err := fetcher.FetchJob(jobNumber)
 	if err != nil {
-		er(err)
+		return err
 	}
 
 	for _, step := range job.Steps {
@@ -68,14 +69,14 @@ func executeFetchLogs(cmd *cobra.Command, args []string) {
 		}
 	}
 
-	return
+	return nil
 }
 
 func newFetchCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "fetch",
 		Short: "fetch logs for a given job name",
-		Run:   executeFetchLogs,
+		RunE:  executeFetchLogs,
 	}
 
 	cmd.Flags().StringP(flagWorkflowID, "w", "", "id of the workflow that the job belongs to")
