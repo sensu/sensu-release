@@ -33,6 +33,10 @@ RUN curl -Lo /tmp/goreleaser.tar.gz https://github.com/goreleaser/goreleaser/rel
 RUN tar -C /tmp -zxf /tmp/goreleaser.tar.gz
 RUN mv /tmp/goreleaser /usr/bin/
 
+# Install gomplate
+RUN curl -Lo /usr/bin/gomplate https://github.com/hairyhenderson/gomplate/releases/download/v3.7.0/gomplate_linux-amd64-slim
+RUN chmod +x /usr/bin/gomplate
+
 # Install the packagecloud cli tool
 RUN gem install package_cloud -v 0.3.05
 
