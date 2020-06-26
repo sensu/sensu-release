@@ -17,8 +17,8 @@ RUN mkdir -p $VAR_TMP_PATH
 RUN mkdir -p $RPM_LIB_PATH
 
 # Install packages
-ENV BUILD_TIME_PKGS="curl ruby-dev tar gcc g++ py3-setuptools"
-ENV RUN_TIME_PKGS="cmake python3 ruby openssh-client git make rpm dpkg dpkg-dev aws-cli bash sudo"
+ENV BUILD_TIME_PKGS="ruby-dev tar gcc g++ py3-setuptools"
+ENV RUN_TIME_PKGS="cmake python3 ruby openssh-client git make rpm dpkg dpkg-dev aws-cli bash sudo curl"
 
 RUN apk add --no-cache $BUILD_TIME_PKGS $RUN_TIME_PKGS
 
