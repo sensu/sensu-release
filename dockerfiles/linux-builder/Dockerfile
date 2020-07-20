@@ -17,8 +17,8 @@ RUN mkdir -p $VAR_TMP_PATH
 RUN mkdir -p $RPM_LIB_PATH
 
 # Install packages
-ENV BUILD_TIME_PKGS="ruby-dev tar gcc g++ py3-setuptools"
-ENV RUN_TIME_PKGS="cmake python3 ruby openssh-client git make rpm dpkg dpkg-dev aws-cli bash sudo curl"
+ENV BUILD_TIME_PKGS="tar gcc g++ py3-setuptools"
+ENV RUN_TIME_PKGS="cmake python3 openssh-client git make rpm dpkg dpkg-dev aws-cli bash sudo curl"
 
 RUN apk add --no-cache $BUILD_TIME_PKGS $RUN_TIME_PKGS
 
@@ -37,8 +37,10 @@ RUN mv /tmp/goreleaser /usr/bin/
 RUN curl -Lo /usr/bin/gomplate https://github.com/hairyhenderson/gomplate/releases/download/v3.7.0/gomplate_linux-amd64-slim
 RUN chmod +x /usr/bin/gomplate
 
-# Install the packagecloud cli tool
-RUN gem install package_cloud -v 0.3.05
+# Install the packagecloud-go cli tool
+RUN curl -Lo /tmp/packagecloud-go.tar.gz https://github.com/amdprophet/packagecloud-go/releases/download/0.1.2/packagecloud-go_0.1.2_linux_amd64.tar.gz
+RUN tar -C /tmp -zxf /tmp/packagecloud-go.tar.gz
+RUN mv /tmp/packagecloud /usr/bin/
 
 # Symlink python to python3
 RUN ln -s /usr/bin/python3 /usr/bin/python
