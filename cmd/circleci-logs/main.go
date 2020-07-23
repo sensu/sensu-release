@@ -123,6 +123,10 @@ func (f Fetcher) fetchURL(url string) ([]byte, error) {
 		return nil, err
 	}
 
+	if resp.StatusCode >= 400 {
+		return nil, fmt.Errorf("received http status %d with message: %s", resp.StatusCode, string(body))
+	}
+
 	return body, nil
 }
 
@@ -177,7 +181,6 @@ func newRootCmd() *cobra.Command {
 		Short: "fetch logs for circleci jobs",
 	}
 
-	cmd.PersistentFlags().StringP(flagAuthToken, "t", "", "circleci api token")
 	cmd.AddCommand(newFetchCmd())
 	cmd.AddCommand(newFetchAllCmd())
 

@@ -76,9 +76,19 @@ func newFetchCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "fetch",
 		Short: "fetch logs for a given job name",
-		RunE:  executeFetchLogs,
+		PreRun: func(cmd *cobra.Command, args []string) {
+			viper.BindPFlag(flagAuthToken, cmd.Flags().Lookup(flagAuthToken))
+			viper.BindPFlag(flagWorkflowID, cmd.Flags().Lookup(flagWorkflowID))
+			viper.BindPFlag(flagProjectType, cmd.Flags().Lookup(flagProjectType))
+			viper.BindPFlag(flagProjectUsername, cmd.Flags().Lookup(flagProjectUsername))
+			viper.BindPFlag(flagProjectRepositoryName, cmd.Flags().Lookup(flagProjectRepositoryName))
+			viper.BindPFlag(flagJobName, cmd.Flags().Lookup(flagJobName))
+			viper.BindPFlag(flagOutputPath, cmd.Flags().Lookup(flagOutputPath))
+		},
+		RunE: executeFetchLogs,
 	}
 
+	cmd.Flags().StringP(flagAuthToken, "t", "", "circleci api token")
 	cmd.Flags().StringP(flagWorkflowID, "w", "", "id of the workflow that the job belongs to")
 	cmd.Flags().StringP(flagProjectType, "p", defaultProjectType, "type of the project that the organization exists within (github or bitbucket)")
 	cmd.Flags().StringP(flagProjectUsername, "u", "", "github or bitbucket username of the project")
@@ -99,14 +109,6 @@ func newFetchCmd() *cobra.Command {
 	viper.BindEnv(flagProjectRepositoryName, "CIRCLE_PROJECT_REPONAME")
 	viper.BindEnv(flagJobName, "CIRCLE_JOB")
 	viper.BindEnv(flagOutputPath, "LOG_OUTPUT_PATH")
-
-	viper.BindPFlag(flagAuthToken, cmd.PersistentFlags().Lookup(flagAuthToken))
-	viper.BindPFlag(flagWorkflowID, cmd.Flags().Lookup(flagWorkflowID))
-	viper.BindPFlag(flagProjectType, cmd.Flags().Lookup(flagProjectType))
-	viper.BindPFlag(flagProjectUsername, cmd.Flags().Lookup(flagProjectUsername))
-	viper.BindPFlag(flagProjectRepositoryName, cmd.Flags().Lookup(flagProjectRepositoryName))
-	viper.BindPFlag(flagJobName, cmd.Flags().Lookup(flagJobName))
-	viper.BindPFlag(flagOutputPath, cmd.Flags().Lookup(flagOutputPath))
 
 	return cmd
 }
