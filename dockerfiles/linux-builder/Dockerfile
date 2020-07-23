@@ -1,4 +1,5 @@
 FROM golang:1.13.12-alpine3.12 as golang
+FROM sensu/sensu-release@sha256:bcd0e081ae40111c305a8e401dbafac64abad40b52bbbfefe06d4f419ea8ccd9 as publishing-tools
 FROM alpine:3.12.0
 
 LABEL name="sensu/sensu-release" \
@@ -9,12 +10,16 @@ ENV WORKSPACE_PATH="/workspace"
 ENV ARTIFACTS_PATH="${WORKSPACE_PATH}/artifacts"
 ENV VAR_TMP_PATH="/var/tmp"
 ENV RPM_LIB_PATH="/var/lib/rpm"
+ENV LOGS_PATH="${ARTIFACTS_PATH}/logs"
+ENV TOOLS_PATH="/tools"
 
 RUN mkdir -p $OBJ_PATH
 RUN mkdir -p $WORKSPACE_PATH
 RUN mkdir -p $ARTIFACTS_PATH
 RUN mkdir -p $VAR_TMP_PATH
 RUN mkdir -p $RPM_LIB_PATH
+RUN mkdir -p $LOGS_PATH
+RUN mkdir -p $TOOLS_PATH
 
 # Install packages
 ENV BUILD_TIME_PKGS="tar gcc g++ py3-setuptools"
@@ -45,6 +50,14 @@ RUN mv /tmp/packagecloud /usr/bin/
 # Symlink python to python3
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
+# Install publishing tools
+COPY --from=publishing-tools /usr/lib/python3.8 /usr/lib/python3.8
+COPY --from=publishing-tools /usr/bin/python3.8 /usr/bin/python3.8
+COPY --from=publishing-tools /usr/bin/python3 /usr/bin/python3
+COPY --from=publishing-tools $TOOLS_PATH/ci-common-functions.sh $TOOLS_PATH/ci-common-functions.sh
+COPY --from=publishing-tools $TOOLS_PATH/circleci-logs $TOOLS_PATH/circleci-logs
+COPY --from=publishing-tools $TOOLS_PATH/post-packages-s3.sh $TOOLS_PATH/post-packages-s3.sh
+
 # Cleanup
 RUN rm -rf /tmp/*
 RUN apk del $BUILD_TIME_PKGS
@@ -61,6 +74,8 @@ RUN chown -R circleci:circleci $ARTIFACTS_PATH
 RUN chown -R circleci:circleci $OBJ_PATH
 RUN chown -R circleci:circleci $VAR_TMP_PATH
 RUN chown -R circleci:circleci $RPM_LIB_PATH
+RUN chown -R circleci:circleci $LOGS_PATH
+RUN chown -R circleci:circleci $TOOLS_PATH
 
 USER circleci
 ENV HOME /home/circleci

@@ -7,29 +7,17 @@ readonly SCRIPT_DIR="$(dirname "$0")"
 . $SCRIPT_DIR/ci-common-functions.sh
 
 # The aws command is in awscli, because we install it ourselves.
-readonly AWK="${AWK:-/usr/bin/awk}"
-readonly AWSCLI="${AWSCLI:-/usr/bin/aws}"
-readonly SED="${SED:-/bin/sed}"
-
 readonly AWS_S3_SENSU_CI_BUILDS_BUCKET="sensu-ci-builds"
 
 if [[ -z "$1" ]]; then
-   echo "Usage: $0 [ deliverables directory ] [ git repository ]" >&2
-   echo "[ git repository ] is optional; if empty, [ deliverables directory] " >&2
-   echo "will be used, but one must be a git repository (to obtain commit information)." >&2
+   echo "Usage: $0 [ deliverables directory ]" >&2
    exit 1
 fi
 
 readonly deliverables_dir="$1"
 
-if [[ -n "$2" ]]; then
-   readonly git_repo="$2"
-else
-   readonly git_repo="$deliverables_dir"
-fi
-
 git_branch="$CIRCLE_BRANCH"
-git_branch_no_slashes="$(echo "$git_branch" | $SED -e 's:/:_:g')"
+git_branch_no_slashes="$(echo "$git_branch" | sed -e 's:/:_:g')"
 git_sha="$CIRCLE_SHA1"
 
 build_date="$COMMIT_DATE"
@@ -41,7 +29,7 @@ export AWS_ACCESS_KEY_ID="$AWS_S3_SENSU_CI_BUILDS_ACCESS_KEY"
 export AWS_SECRET_ACCESS_KEY="$AWS_S3_SENSU_CI_BUILDS_ACCESS_SECRET"
 reenable_execution_tracing
 
-$AWSCLI \
+aws \
    s3 \
    cp \
    --recursive \
@@ -49,11 +37,12 @@ $AWSCLI \
    $deliverables_dir \
    s3://$AWS_S3_SENSU_CI_BUILDS_BUCKET/$git_branch_no_slashes/$bucket_dir
 
-uploaded_build_artifacts="$($AWSCLI s3 ls --recursive s3://$AWS_S3_SENSU_CI_BUILDS_BUCKET/$git_branch_no_slashes/$bucket_dir | $AWK '{print $4}')"
+uploaded_build_artifacts=$(cd $deliverables_dir && find * -type f)
 
-for obj in $uploaded_build_artifacts; do
+for file in $uploaded_build_artifacts; do
+   obj="${git_branch_no_slashes}/${bucket_dir}/${file}"
    echo "Tagging $obj for artifact garbage collection..."
-   $AWSCLI s3api put-object-tagging --bucket $AWS_S3_SENSU_CI_BUILDS_BUCKET \
+   aws s3api put-object-tagging --bucket $AWS_S3_SENSU_CI_BUILDS_BUCKET \
      --key "$obj" \
      --tagging '{
                   "TagSet": [
@@ -66,4 +55,3 @@ for obj in $uploaded_build_artifacts; do
 
    sleep 1
 done
-
