@@ -29,7 +29,7 @@ aws s3 sync "${source_base_uri}/logs" "${destination_base_uri}" --acl public-rea
 aws s3 cp "${source_base_uri}/build/goreleaser" "${destination_base_uri}" --acl public-read --recursive --exclude "*" --include "*.txt" --include "*.tar.gz" --include "*.zip"
 
 # Sync goreleaser dirs for non-standard builds
-other_builds=("fips-openssl-1.0" "fips-openssl-1.1")
+other_builds=("cgo" "fips-openssl-1.0" "fips-openssl-1.1")
 for build in ${other_builds[@]}; do
     aws s3 cp "${source_base_uri}/${build}/goreleaser" "${destination_base_uri}/${build}" --acl public-read --recursive --exclude "*" --include "*.txt" --include "*.tar.gz" --include "*.zip"
 done
