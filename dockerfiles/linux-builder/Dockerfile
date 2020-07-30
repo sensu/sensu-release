@@ -1,4 +1,4 @@
-FROM golang:1.13.7-alpine3.12 as golang
+FROM golang:1.13.7-alpine3.11 as golang
 FROM sensu/sensu-release@sha256:bcd0e081ae40111c305a8e401dbafac64abad40b52bbbfefe06d4f419ea8ccd9 as publishing-tools
 FROM alpine:3.12.0
 
