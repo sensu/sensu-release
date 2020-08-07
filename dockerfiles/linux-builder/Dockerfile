@@ -76,6 +76,7 @@ RUN chown -R circleci:circleci $VAR_TMP_PATH
 RUN chown -R circleci:circleci $RPM_LIB_PATH
 RUN chown -R circleci:circleci $LOGS_PATH
 RUN chown -R circleci:circleci $TOOLS_PATH
+RUN chown -R circleci:circleci /tmp
 
 USER circleci
 ENV HOME /home/circleci
