@@ -8,5 +8,9 @@ workflows:
     jobs:
       - docker/publish:
           image: sensu/justin-testing
+          tag: alpine-builder-$CIRCLE_SHA1
           dockerfile: dockerfiles/linux-builder/Dockerfile
-          update-description: true
+      - docker/publish:
+          image: sensu/justin-testing
+          tag: redhat7-builder-$CIRCLE_SHA1
+          dockerfile: dockerfiles/rhel7-builder/Dockerfile
