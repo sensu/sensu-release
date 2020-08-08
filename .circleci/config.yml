@@ -1,0 +1,12 @@
+version: 2.1
+
+orbs:
+  docker: circleci/docker@1.4.0
+
+workflows:
+  docker:
+    jobs:
+      - docker/publish:
+          image: sensu/justin-testing
+          dockerfile: dockerfiles/linux-builder/Dockerfile
+          update-description: true
