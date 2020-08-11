@@ -7,18 +7,22 @@ workflows:
   docker:
     jobs:
       - docker/publish:
+          name: "linux-builder"
           image: sensu/justin-testing
           tag: ${CIRCLE_TAG:-$CIRCLE_SHA1}-linux-builder
           dockerfile: dockerfiles/linux-builder/Dockerfile
       - docker/publish:
+          name: "rhel7-builder"
           image: sensu/justin-testing
           tag: ${CIRCLE_TAG:-$CIRCLE_SHA1}-redhat7-builder
           dockerfile: dockerfiles/rhel7-builder/Dockerfile
       - docker/publish:
+          name: "rhel8-builder"
           image: sensu/justin-testing
           tag: ${CIRCLE_TAG:-$CIRCLE_SHA1}-redhat8-builder
           dockerfile: dockerfiles/rhel8-builder/Dockerfile
       - docker/publish:
+          name: "packagecloud-pruner"
           image: sensu/justin-testing
           tag: ${CIRCLE_TAG:-$CIRCLE_SHA1}-packagecloud-pruner
           dockerfile: dockerfiles/packagecloud-pruner/Dockerfile
