@@ -43,4 +43,4 @@ find "${checksums_dir}" -type f -exec cat {} \; | sort -k2 > $checksums_file
 aws s3 cp "${checksums_file}" "${destination_base_uri}/${checksums_filename}" --acl public-read
 
 # Sync nupkg files to local nupkgs dir
-aws s3 sync "${source_base_uri}/build/nupkg" nupkgs/
+aws s3 sync "${source_base_uri}/nupkg" nupkgs/
