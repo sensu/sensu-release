@@ -1,33 +1,28 @@
 ### Building & Publishing Dockerfiles
 
-#### Logging in to registry.redhat.io
+Docker images are automatically built and published for every commit. The images
+are tagged differently depending on whether or not it was built from a git
+commit or a git tag.
 
-**NOTE:** This may not be necessary.
+#### Git Commits
 
-1. Go to https://access.redhat.com/terms-based-registry/ and create an account.
-2. Login and create a service account.
-3. After receiving a token, run:
+A git commit with the sha `f412c9cd4181f2b25d4db946914c8096cb25ccbd`will
+generate the following Docker tags:
 
-``` shell
-docker login registry.redhat.io
+```
+sensu/sensu-release:f412c9cd4181f2b25d4db946914c8096cb25ccbd-linux-builder
+sensu/sensu-release:f412c9cd4181f2b25d4db946914c8096cb25ccbd-rhel7-builder
+sensu/sensu-release:f412c9cd4181f2b25d4db946914c8096cb25ccbd-rhel8-builder
+sensu/sensu-release:f412c9cd4181f2b25d4db946914c8096cb25ccbd-packagecloud-pruner
 ```
 
-#### Building images for testing
+#### Git Tags
 
-``` shell
-# use one of the directory names in the dockerfiles directory (e.g. linux-builder)
-export IMAGE_NAME="image_name"
-export DOCKERHUB_USERNAME="your_dockerhub_username_here"
-export TAG_NAME="${IMAGE_NAME}-${DOCKERHUB_USERNAME}"
-docker build . -f dockerfiles/linux-publisher/Dockerfile -t sensu/sensu-release:${TAG_NAME}
-docker push sensu/sensu-release:${TAG_NAME}
+A git tag with the name `v1.2.3` will generate the following Docker tags:
+
 ```
-
-#### Building images for release
-
-``` shell
-# use one of the directory names in the dockerfiles directory (e.g. linux-builder)
-export IMAGE_NAME="image_name"
-docker build . -f dockerfiles/linux-publisher/Dockerfile -t sensu/sensu-release:${IMAGE_NAME}
-docker push sensu/sensu-release:${IMAGE_NAME}
+sensu/sensu-release:v1.2.3-linux-builder
+sensu/sensu-release:v1.2.3-rhel7-builder
+sensu/sensu-release:v1.2.3-rhel8-builder
+sensu/sensu-release:v1.2.3-packagecloud-pruner
 ```

@@ -1,6 +1,23 @@
-FROM golang:1.13.15-alpine3.12 as golang
-FROM sensu/sensu-release@sha256:bcd0e081ae40111c305a8e401dbafac64abad40b52bbbfefe06d4f419ea8ccd9 as publishing-tools
-FROM alpine:3.12.0
+ARG ALPINE_VERSION=3.12
+ARG GO_VERSION=1.13.15
+ARG GOMPLATE_VERSION=3.7.0
+ARG GORELEASER_VERSION=0.141.0
+ARG PYTHON_VERSION=3.8.5
+ARG PACKAGECLOUDGO_VERSION=0.1.2
+FROM golang:${GO_VERSION}-alpine${ALPINE_VERSION} as golang
+
+# Build circleci-logs
+COPY go.mod /tmp/sensu-release/
+COPY go.sum /tmp/sensu-release/
+ADD cmd /tmp/sensu-release/cmd
+RUN cd /tmp/sensu-release && go build ./cmd/circleci-logs
+
+FROM hairyhenderson/gomplate:v${GOMPLATE_VERSION}-alpine as gomplate
+FROM goreleaser/goreleaser:v${GORELEASER_VERSION} as goreleaser
+FROM python:${PYTHON_VERSION}-alpine${ALPINE_VERSION} as python
+FROM golang:${GO_VERSION}-alpine${ALPINE_VERSION}
+
+ARG PACKAGECLOUDGO_VERSION
 
 LABEL name="sensu/sensu-release" \
       maintainer="engineering@sensu.io"
@@ -23,7 +40,7 @@ RUN mkdir -p $TOOLS_PATH
 
 # Install packages
 ENV BUILD_TIME_PKGS="tar gcc g++ py3-setuptools"
-ENV RUN_TIME_PKGS="cmake python3 openssh-client git make rpm dpkg dpkg-dev aws-cli bash sudo curl"
+ENV RUN_TIME_PKGS="cmake openssh-client git make rpm dpkg dpkg-dev aws-cli bash sudo curl"
 
 RUN apk add --no-cache $BUILD_TIME_PKGS $RUN_TIME_PKGS
 
@@ -33,30 +50,30 @@ ENV PATH="/usr/local/go/bin:$PATH"
 ENV GO111MODULE="on"
 ENV GOPROXY="https://proxy.golang.org"
 
-# Install goreleaser
-RUN curl -Lo /tmp/goreleaser.tar.gz https://github.com/goreleaser/goreleaser/releases/download/v0.136.0/goreleaser_Linux_x86_64.tar.gz
-RUN tar -C /tmp -zxf /tmp/goreleaser.tar.gz
-RUN mv /tmp/goreleaser /usr/bin/
-
-# Install gomplate
-RUN curl -Lo /usr/bin/gomplate https://github.com/hairyhenderson/gomplate/releases/download/v3.7.0/gomplate_linux-amd64-slim
-RUN chmod +x /usr/bin/gomplate
-
-# Install the packagecloud-go cli tool
-RUN curl -Lo /tmp/packagecloud-go.tar.gz https://github.com/amdprophet/packagecloud-go/releases/download/0.1.2/packagecloud-go_0.1.2_linux_amd64.tar.gz
-RUN tar -C /tmp -zxf /tmp/packagecloud-go.tar.gz
-RUN mv /tmp/packagecloud /usr/bin/
-
-# Symlink python to python3
-RUN ln -s /usr/bin/python3 /usr/bin/python
+# Install python
+COPY --from=python /usr/local/bin/python /usr/local/bin/python
+COPY --from=python /usr/local/bin/python3 /usr/local/bin/python3
+COPY --from=python /usr/local/bin/python3.8 /usr/local/bin/python3.8
+COPY --from=python /usr/local/lib/python3.8 /usr/local/lib/python3.8
 
 # Install publishing tools
-COPY --from=publishing-tools /usr/lib/python3.8 /usr/lib/python3.8
-COPY --from=publishing-tools /usr/bin/python3.8 /usr/bin/python3.8
-COPY --from=publishing-tools /usr/bin/python3 /usr/bin/python3
-COPY --from=publishing-tools $TOOLS_PATH/ci-common-functions.sh $TOOLS_PATH/ci-common-functions.sh
-COPY --from=publishing-tools $TOOLS_PATH/circleci-logs $TOOLS_PATH/circleci-logs
-COPY --from=publishing-tools $TOOLS_PATH/post-packages-s3.sh $TOOLS_PATH/post-packages-s3.sh
+COPY ci-common-functions.sh $TOOLS_PATH
+COPY post-packages-s3.sh $TOOLS_PATH
+
+# Install circleci-logs
+COPY --from=golang /tmp/sensu-release/circleci-logs /usr/local/bin/
+
+# Install goreleaser
+COPY --from=goreleaser /bin/goreleaser /usr/local/bin/goreleaser
+
+# Install gomplate
+COPY --from=gomplate /bin/gomplate /usr/local/bin/gomplate
+
+# Install the packagecloud-go cli tool
+RUN curl -Lo /tmp/packagecloud-go.tar.gz \
+    https://github.com/amdprophet/packagecloud-go/releases/download/${PACKAGECLOUDGO_VERSION}/packagecloud-go_${PACKAGECLOUDGO_VERSION}_linux_amd64.tar.gz
+RUN tar -C /tmp -zxf /tmp/packagecloud-go.tar.gz
+RUN mv /tmp/packagecloud /usr/local/bin/
 
 # Cleanup
 RUN rm -rf /tmp/*
