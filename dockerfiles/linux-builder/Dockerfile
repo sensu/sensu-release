@@ -40,7 +40,7 @@ RUN mkdir -p $TOOLS_PATH
 
 # Install packages
 ENV BUILD_TIME_PKGS="tar gcc g++ py3-setuptools"
-ENV RUN_TIME_PKGS="cmake openssh-client git make rpm dpkg dpkg-dev aws-cli bash sudo curl"
+ENV RUN_TIME_PKGS="cmake openssh-client git make rpm dpkg dpkg-dev aws-cli bash sudo curl jq"
 
 RUN apk add --no-cache $BUILD_TIME_PKGS $RUN_TIME_PKGS
 
