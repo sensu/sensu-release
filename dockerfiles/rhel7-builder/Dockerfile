@@ -63,6 +63,7 @@ ENV GO111MODULE="on"
 ENV GOPROXY="https://proxy.golang.org"
 RUN export PATH=$PATH:$(dirname $(find /opt -name go -type f)) && \
   cd $TOOLS_PATH && go build ./cmd/circleci-logs
+RUN cp $TOOLS_PATH/circleci-logs /usr/local/bin
 
 # Add circleci user
 RUN useradd --uid=3434 --user-group --create-home circleci
