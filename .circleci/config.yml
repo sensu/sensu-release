@@ -2,6 +2,34 @@ version: 2.1
 
 orbs:
   docker: circleci/docker@1.4.0
+  buildx: amdprophet/docker-buildx@dev:first
+
+jobs:
+  build-docker:
+    executor:
+      name: docker/machine
+      image: "ubuntu-1604:202007-01"
+      dlc: true
+    parameters:
+      image:
+        type: string
+      dockerfile:
+        type: string
+      tag:
+        type: string
+      platforms:
+        type: string
+    steps:
+      - checkout
+      - buildx/install
+      - run:
+          name: Login to Docker
+          command: echo $DOCKER_PASSWORD | docker login --username $DOCKER_LOGIN --password-stdin
+      - docker/build:
+          image: sensu/sensu-release
+          tag: << parameters.tag >>
+          dockerfile: << parameters.dockerfile >>
+          extra_build_args: --push --platform << parameters.platforms >>
 
 workflows:
   docker:
@@ -11,16 +39,18 @@ workflows:
           image: sensu/sensu-release
           tag: ${CIRCLE_TAG:-$CIRCLE_SHA1}-linux-builder
           dockerfile: dockerfiles/linux-builder/Dockerfile
-      - docker/publish:
+      - build-docker:
           name: "rhel7-builder"
           image: sensu/sensu-release
           tag: ${CIRCLE_TAG:-$CIRCLE_SHA1}-redhat7-builder
           dockerfile: dockerfiles/rhel7-builder/Dockerfile
-      - docker/publish:
+          platforms: linux/amd64,linux/ppc64le,linux/s390x
+      - build-docker:
           name: "rhel8-builder"
           image: sensu/sensu-release
           tag: ${CIRCLE_TAG:-$CIRCLE_SHA1}-redhat8-builder
           dockerfile: dockerfiles/rhel8-builder/Dockerfile
+          platforms: linux/amd64,linux/arm64,linux/ppc64le,linux/s390x
       - docker/publish:
           name: "packagecloud-pruner"
           image: sensu/sensu-release
