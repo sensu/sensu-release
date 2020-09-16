@@ -22,25 +22,25 @@ destination_base_uri="s3://${release_bucket}/sensu-go/${3}"
 
 aws s3 sync "${source_base_uri}/build/deb" "${destination_base_uri}" --acl public-read
 aws s3 sync "${source_base_uri}/build/rpm" "${destination_base_uri}" --acl public-read
-aws s3 sync "${source_base_uri}/msi" "${destination_base_uri}" --acl public-read
-aws s3 sync "${source_base_uri}/nupkg" "${destination_base_uri}" --acl public-read
+aws s3 sync "${source_base_uri}/build/msi" "${destination_base_uri}" --acl public-read
+aws s3 sync "${source_base_uri}/build/nupkg" "${destination_base_uri}" --acl public-read
 aws s3 sync "${source_base_uri}/logs" "${destination_base_uri}/logs"
 
-aws s3 cp "${source_base_uri}/build/goreleaser" "${destination_base_uri}" --acl public-read --recursive --exclude "*" --include "*.tar.gz" --include "*.zip"
+aws s3 cp "${source_base_uri}/build" "${destination_base_uri}" --acl public-read --recursive --exclude "*" --include "*.tar.gz" --include "*.zip"
 
-# Sync goreleaser dirs for non-standard builds
+# Sync build dirs for non-standard builds
 other_builds=("cgo" "fips-openssl-1.0" "fips-openssl-1.1")
 for build in ${other_builds[@]}; do
-    aws s3 cp "${source_base_uri}/${build}/goreleaser" "${destination_base_uri}/${build}" --acl public-read --recursive --exclude "*" --include "*.txt" --include "*.tar.gz" --include "*.zip"
+    aws s3 cp "${source_base_uri}/${build}" "${destination_base_uri}/${build}" --acl public-read --recursive --exclude "*" --include "*.txt" --include "*.tar.gz" --include "*.zip"
 done
 
 # download checksum files, concatenate them, and then upload the checksums file
 checksums_dir=$(mktemp -d)
-aws s3 cp "${source_base_uri}/build/goreleaser" "${checksums_dir}" --recursive --exclude "*" --include "*.txt"
+aws s3 cp "${source_base_uri}" "${checksums_dir}" --recursive --exclude "*" --include "*.txt"
 checksums_filename=$(find "${checksums_dir}" -type f -print | head -n 1 | xargs basename)
 checksums_file="${checksums_dir}/${checksums_filename}"
 find "${checksums_dir}" -type f -exec cat {} \; | sort -k2 > $checksums_file
 aws s3 cp "${checksums_file}" "${destination_base_uri}/${checksums_filename}" --acl public-read
 
 # Sync nupkg files to local nupkgs dir
-aws s3 sync "${source_base_uri}/nupkg" nupkgs/
+aws s3 sync "${source_base_uri}/build/nupkg" nupkgs/
