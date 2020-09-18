@@ -41,6 +41,8 @@ RUN mkdir -p $LOGS_PATH
 RUN mkdir -p $TOOLS_PATH
 
 # Copy sensu-release tools to /tools
+COPY ci-common-functions.sh $TOOLS_PATH
+COPY post-packages-s3.sh $TOOLS_PATH
 COPY go.mod $TOOLS_PATH
 COPY go.sum $TOOLS_PATH
 ADD cmd $TOOLS_PATH/cmd

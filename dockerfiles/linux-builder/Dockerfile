@@ -45,6 +45,10 @@ ENV PATH="/usr/local/go/bin:$PATH"
 ENV GO111MODULE="on"
 ENV GOPROXY="https://proxy.golang.org"
 
+# Install publishing tools
+COPY ci-common-functions.sh $TOOLS_PATH
+COPY post-packages-s3.sh $TOOLS_PATH
+
 # Install circleci-logs
 COPY --from=golang /tmp/sensu-release/circleci-logs /usr/local/bin/
 
