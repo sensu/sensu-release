@@ -1,20 +1,9 @@
-FROM registry.access.redhat.com/ubi7/python-38:1 as python
 FROM registry.access.redhat.com/ubi7/go-toolset:1.13.4
 
 LABEL name="sensu/sensu-release" \
       maintainer="engineering@sensu.io"
 
 USER root
-
-# Install python3.8
-COPY --from=python /opt/app-root/bin/python3.8 /opt/app-root/bin/python3.8
-COPY --from=python /opt/app-root/bin/python3.8 /opt/app-root/bin/python3
-COPY --from=python /opt/app-root/bin/python3.8 /opt/app-root/bin/python
-COPY --from=python /opt/app-root/lib/python3.8 /opt/app-root/lib/python3
-COPY --from=python /opt/app-root/lib64/python3.8 /opt/app-root/lib64/python3
-COPY --from=python /opt/app-root/bin/pip /opt/app-root/bin/pip
-COPY --from=python /opt/app-root/bin/pip /opt/app-root/bin/pip3
-COPY --from=python /opt/app-root/bin/pip /opt/app-root/bin/pip3.8
 
 # Install packages
 ENV SYSTEM_PKGS="openssl sudo"
