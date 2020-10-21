@@ -16,7 +16,6 @@ match="$(aws s3 ls s3://${ci_bucket}/${git_branch_no_slashes}/ | grep $1)"
 dir_name_with_slash="$(echo $match | awk '{print $2}')"
 dir_name="$(echo ${dir_name_with_slash%/})"
 
-
 source_base_uri="s3://${ci_bucket}/${git_branch_no_slashes}/${dir_name}"
 destination_base_uri="s3://${release_bucket}/sensu-go/${3}"
 
@@ -36,9 +35,14 @@ done
 
 # download checksum files, concatenate them, and then upload the checksums file
 checksums_dir=$(mktemp -d)
-aws s3 cp "${source_base_uri}" "${checksums_dir}" --recursive --exclude "*" --include "*.txt"
-checksums_filename=$(find "${checksums_dir}" -type f -print | head -n 1 | xargs basename)
-checksums_file="${checksums_dir}/${checksums_filename}"
+aws s3 cp "${source_base_uri}" "${checksums_dir}" --recursive --exclude "*" --include "build/*.txt" --include "cgo/*.txt" --include "fips*/*.txt"
+checksums_file="${checksums_dir}/sensu-go_${3}_checksums.txt"
+for build in ${other_builds[@]}; do
+    build_dir="${checksums_dir}/${build}"
+    tmp_file=$(mktemp)
+    find "${build_dir}" -type f -exec awk '{gsub(/sensu-go/,"'$build'/sensu-go")}1' {} > $tmp_file \;
+    find "${build_dir}" -type f -exec mv $tmp_file {} \;
+done
 find "${checksums_dir}" -type f -exec cat {} \; | sort -k2 > $checksums_file
 aws s3 cp "${checksums_file}" "${destination_base_uri}/${checksums_filename}" --acl public-read
 
