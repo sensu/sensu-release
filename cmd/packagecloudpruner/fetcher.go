@@ -32,6 +32,7 @@ func (p *PackageFetcher) RequestCurrentPage() ([]Package, error) {
 	resp, err := p.client.R().
 		SetHeader("Per-Page", p.perPage).
 		SetResult([]Package{}).
+		SetQueryParam("per_page", p.perPage).
 		Get(p.nextPageURL)
 	if err != nil {
 		return packagesToRemove, err
@@ -43,6 +44,13 @@ func (p *PackageFetcher) RequestCurrentPage() ([]Package, error) {
 	// loop through the packages and remove them if the time since creation
 	// is 30 days or more
 	for _, pkg := range *resp.Result().(*[]Package) {
+		log.WithFields(log.Fields{
+			"name":         pkg.Name,
+			"version":      pkg.Version,
+			"build_number": pkg.Release,
+			"distro":       pkg.DistroVersion,
+		}).Info("found package to evaluate")
+
 		if pkg.OlderThan(maxAge) {
 			packagesToRemove = append(packagesToRemove, pkg)
 		}
