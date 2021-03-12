@@ -30,7 +30,6 @@ func (p *PackageFetcher) RequestCurrentPage() ([]Package, error) {
 
 	// request the page of packages
 	resp, err := p.client.R().
-		SetHeader("Per-Page", p.perPage).
 		SetResult([]Package{}).
 		SetQueryParam("per_page", p.perPage).
 		Get(p.nextPageURL)
