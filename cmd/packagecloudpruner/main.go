@@ -16,7 +16,7 @@ const (
 	repository       = "ci-builds"
 	retryMaxAttempts = 5
 	maxAge           = 30 // in days
-	defaultPerPage   = "100"
+	defaultPerPage   = "250"
 )
 
 type ResponseError struct {
@@ -35,7 +35,16 @@ func handleRestyError(resp *resty.Response, i interface{}) error {
 		errMsg = resp.Status()
 	}
 	if errStatus == http.StatusNotFound {
-		return nil
+		// ignore 404 status for DELETE method
+		if resp.Request.Method == resty.MethodDelete {
+			log.WithFields(log.Fields{
+				"url":     resp.Request.URL,
+				"method":  resp.Request.Method,
+				"status":  errStatus,
+				"message": errMsg,
+			}).Warn("not found, ignoring")
+			return nil
+		}
 	}
 	return fmt.Errorf("status: %d, error: %s", errStatus, errMsg)
 }
