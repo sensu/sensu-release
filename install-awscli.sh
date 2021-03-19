@@ -27,6 +27,7 @@ if [[ "$setuptools_test" -ne "0" ]]; then
     $SUDO apt-get install python-setuptools
 fi
 
+$SUDO pip install setuptools_scm==5.0.2
 
 $MKDIR -p $AWSCLI_INSTALL_DIR
 cd $AWSCLI_INSTALL_DIR
