@@ -53,7 +53,7 @@ COPY post-packages-s3.sh $TOOLS_PATH
 COPY --from=golang /tmp/sensu-release/circleci-logs /usr/local/bin/
 
 # Install goreleaser
-COPY --from=goreleaser /bin/goreleaser /usr/local/bin/goreleaser
+COPY --from=goreleaser /usr/local/bin/goreleaser /usr/local/bin/goreleaser
 
 # Install gomplate
 COPY --from=gomplate /bin/gomplate /usr/local/bin/gomplate
