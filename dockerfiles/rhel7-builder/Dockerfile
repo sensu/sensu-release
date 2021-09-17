@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi7/go-toolset:1.15.14
+FROM registry.access.redhat.com/ubi7/go-toolset:1.15.11
 
 LABEL name="sensu/sensu-release" \
       maintainer="engineering@sensu.io"
