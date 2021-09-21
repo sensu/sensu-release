@@ -1,7 +1,7 @@
-ARG ALPINE_VERSION=3.12
-ARG GO_VERSION=1.16.5
-ARG GOMPLATE_VERSION=3.8.0
-ARG GORELEASER_VERSION=0.141.0
+ARG ALPINE_VERSION=3.14
+ARG GO_VERSION=1.17.1
+ARG GOMPLATE_VERSION=3.9.0
+ARG GORELEASER_VERSION=0.173.0
 FROM golang:${GO_VERSION}-alpine${ALPINE_VERSION} as golang
 
 # Build circleci-logs
@@ -53,7 +53,7 @@ COPY post-packages-s3.sh $TOOLS_PATH
 COPY --from=golang /tmp/sensu-release/circleci-logs /usr/local/bin/
 
 # Install goreleaser
-COPY --from=goreleaser /bin/goreleaser /usr/local/bin/goreleaser
+COPY --from=goreleaser /usr/local/bin/goreleaser /usr/local/bin/goreleaser
 
 # Install gomplate
 COPY --from=gomplate /bin/gomplate /usr/local/bin/gomplate
