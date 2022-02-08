@@ -1,11 +1,9 @@
 #!/bin/sh
 
-# This script will generate auth.json and store it in $SKOPEO_CONFIG_DIR for use
-# with other Skopeo commands.
-#
-# If you already have used Skopeo locally you do not need to use this script.
-# Instead, set SKOPEO_CONFIG_DIR to the directory on your local system which
-# contains auth.json (likely ~/.config/containers).
+# This script will copy remote container images from one repository to another.
+# It requires that auth.json already exists within $SKOPEO_CONFIG_DIR. See the
+# skopeo-login.sh script if you have not yet logged into your Docker Hub account
+# with Skopeo before.
 
 usage() {
     echo "usage:"
