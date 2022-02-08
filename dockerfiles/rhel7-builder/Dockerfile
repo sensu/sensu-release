@@ -17,7 +17,7 @@ RUN INSTALL_PKGS="${SYSTEM_PKGS}" && \
 RUN yum -y --setopt=tsflags=nodocs install http://mirror.centos.org/centos/7/os/x86_64/Packages/pcre2-10.23-2.el7.x86_64.rpm
 RUN yum -y --setopt=tsflags=nodocs install http://mirror.centos.org/centos/7/os/x86_64/Packages/emacs-filesystem-24.3-23.el7.noarch.rpm
 RUN yum -y --setopt=tsflags=nodocs install http://mirror.centos.org/centos/7/os/x86_64/Packages/libsecret-0.18.6-1.el7.x86_64.rpm
-RUN yum -y --setopt=tsflags=nodocs install https://packages.endpoint.com/rhel/7/os/x86_64/endpoint-repo-1.7-1.x86_64.rpm
+RUN yum -y --setopt=tsflags=nodocs install https://packages.endpointdev.com/rhel/7/os/x86_64/endpoint-repo-1.10-1.x86_64.rpm
 RUN yum -y --setopt=tsflags=nodocs install git
 RUN yum -y clean all --enablerepo='*'
 
