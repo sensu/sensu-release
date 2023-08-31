@@ -35,7 +35,7 @@ RUN mkdir -p $TOOLS_PATH
 
 # Install packages
 ENV BUILD_TIME_PKGS="tar"
-ENV RUN_TIME_PKGS="openssh-client git make aws-cli bash sudo curl jq"
+ENV RUN_TIME_PKGS="openssh-client git make aws-cli bash sudo curl jq build-base"
 
 RUN apk add --no-cache $BUILD_TIME_PKGS $RUN_TIME_PKGS
 
