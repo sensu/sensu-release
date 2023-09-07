@@ -1,8 +1,8 @@
-ARG ALPINE_VERSION=3.14
-ARG GO_VERSION=1.17.6
+ARG DEBIAN_VERSION="bullseye"
+ARG GO_VERSION=1.19.5
 ARG GOMPLATE_VERSION=3.9.0
 ARG GORELEASER_VERSION=0.173.0
-FROM golang:${GO_VERSION}-alpine${ALPINE_VERSION} as golang
+FROM golang:${GO_VERSION}-${DEBIAN_VERSION} as golang
 
 # Build circleci-logs
 COPY go.mod /tmp/sensu-release/
@@ -10,9 +10,9 @@ COPY go.sum /tmp/sensu-release/
 ADD cmd /tmp/sensu-release/cmd
 RUN cd /tmp/sensu-release && go build ./cmd/circleci-logs
 
-FROM hairyhenderson/gomplate:v${GOMPLATE_VERSION}-alpine as gomplate
+FROM hairyhenderson/gomplate:v${GOMPLATE_VERSION} as gomplate
 FROM goreleaser/goreleaser:v${GORELEASER_VERSION} as goreleaser
-FROM golang:${GO_VERSION}-alpine${ALPINE_VERSION}
+FROM golang:${GO_VERSION}-${DEBIAN_VERSION}
 
 LABEL name="sensu/sensu-release" \
       maintainer="engineering@sensu.io"
@@ -34,10 +34,10 @@ RUN mkdir -p $LOGS_PATH
 RUN mkdir -p $TOOLS_PATH
 
 # Install packages
-ENV BUILD_TIME_PKGS="tar"
-ENV RUN_TIME_PKGS="openssh-client git make aws-cli bash sudo curl jq"
+ENV RUN_TIME_PKGS="openssh-client git build-essential awscli bash sudo curl silversearcher-ag"
 
-RUN apk add --no-cache $BUILD_TIME_PKGS $RUN_TIME_PKGS
+RUN apt update
+RUN apt install -y $BUILD_TIME_PKGS $RUN_TIME_PKGS
 
 # Install go
 COPY --from=golang /usr/local/go /usr/local/go
@@ -56,14 +56,10 @@ COPY --from=golang /tmp/sensu-release/circleci-logs /usr/local/bin/
 COPY --from=goreleaser /usr/local/bin/goreleaser /usr/local/bin/goreleaser
 
 # Install gomplate
-COPY --from=gomplate /bin/gomplate /usr/local/bin/gomplate
-
-# Cleanup
-RUN rm -rf /tmp/*
-RUN apk del $BUILD_TIME_PKGS
+COPY --from=gomplate /gomplate /usr/local/bin/gomplate
 
 # Add circleci user
-RUN adduser -u 3434 -D -s /bin/bash circleci
+RUN adduser --uid 3434 --disabled-login --disabled-password --shell /bin/bash circleci
 RUN echo 'circleci ALL=NOPASSWD: ALL' >> /etc/sudoers.d/50-circleci
 RUN echo 'Defaults    env_keep += "DEBIAN_FRONTEND"' >> /etc/sudoers.d/env_keep
 RUN sudo -u circleci mkdir /home/circleci/project
