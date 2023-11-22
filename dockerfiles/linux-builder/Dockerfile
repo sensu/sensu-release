@@ -1,5 +1,8 @@
+# The Debian version that the Ubuntu version is based on should be used as the
+# value for DEBIAN_VERSION. E.g. Ubuntu 20.04 is based on Debian Bullseye.
 ARG DEBIAN_VERSION="bullseye"
-ARG GO_VERSION=1.19.5
+ARG UBUNTU_VERSION="20.04"
+ARG GO_VERSION=1.21.3
 ARG GOMPLATE_VERSION=3.9.0
 ARG GORELEASER_VERSION=0.173.0
 FROM golang:${GO_VERSION}-${DEBIAN_VERSION} as golang
@@ -12,7 +15,20 @@ RUN cd /tmp/sensu-release && go build ./cmd/circleci-logs
 
 FROM hairyhenderson/gomplate:v${GOMPLATE_VERSION} as gomplate
 FROM goreleaser/goreleaser:v${GORELEASER_VERSION} as goreleaser
-FROM golang:${GO_VERSION}-${DEBIAN_VERSION}
+FROM ubuntu:${UBUNTU_VERSION} as toolchain
+
+ARG TARGETPLATFORM
+
+ENV PKGS="git wget xz-utils build-essential"
+
+RUN apt update
+RUN apt install -y $PKGS
+
+ADD toolchain /toolchain
+
+RUN make -C ./toolchain toolchain-${TARGETPLATFORM} OUTPUT=/opt/toolchain -j3
+
+FROM ubuntu:${UBUNTU_VERSION}
 
 LABEL name="sensu/sensu-release" \
       maintainer="engineering@sensu.io"
@@ -33,11 +49,18 @@ RUN mkdir -p $RPM_LIB_PATH
 RUN mkdir -p $LOGS_PATH
 RUN mkdir -p $TOOLS_PATH
 
+# Set timezone as some packages require it
+ENV TZ=America/Vancouver \
+    DEBIAN_FRONTEND=noninteractive
+
 # Install packages
-ENV RUN_TIME_PKGS="openssh-client git build-essential awscli bash sudo curl silversearcher-ag"
+ENV PKGS="openssh-client git build-essential awscli bash sudo curl silversearcher-ag"
 
 RUN apt update
-RUN apt install -y $BUILD_TIME_PKGS $RUN_TIME_PKGS
+RUN apt install -y $PKGS
+
+# Install toolchain
+COPY --from=toolchain /opt/toolchain /opt/toolchain
 
 # Install go
 COPY --from=golang /usr/local/go /usr/local/go
@@ -62,6 +85,7 @@ COPY --from=gomplate /gomplate /usr/local/bin/gomplate
 RUN adduser --uid 3434 --disabled-login --disabled-password --shell /bin/bash circleci
 RUN echo 'circleci ALL=NOPASSWD: ALL' >> /etc/sudoers.d/50-circleci
 RUN echo 'Defaults    env_keep += "DEBIAN_FRONTEND"' >> /etc/sudoers.d/env_keep
+
 RUN sudo -u circleci mkdir /home/circleci/project
 
 # Fix ownership
@@ -73,6 +97,7 @@ RUN chown -R circleci:circleci $RPM_LIB_PATH
 RUN chown -R circleci:circleci $LOGS_PATH
 RUN chown -R circleci:circleci $TOOLS_PATH
 RUN chown -R circleci:circleci /tmp
+RUN chown -R circleci:circleci /home/circleci
 
 USER circleci
 ENV HOME /home/circleci
