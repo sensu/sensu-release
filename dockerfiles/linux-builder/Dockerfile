@@ -17,8 +17,6 @@ FROM hairyhenderson/gomplate:v${GOMPLATE_VERSION} as gomplate
 FROM goreleaser/goreleaser:v${GORELEASER_VERSION} as goreleaser
 FROM ubuntu:${UBUNTU_VERSION} as toolchain
 
-ARG TARGETPLATFORM
-
 ENV PKGS="git wget xz-utils build-essential"
 
 RUN apt update
@@ -26,7 +24,7 @@ RUN apt install -y $PKGS
 
 ADD toolchain /toolchain
 
-RUN make -C ./toolchain toolchain-${TARGETPLATFORM} OUTPUT=/opt/toolchain -j3
+RUN make -C ./toolchain toolchain-linux/amd64 OUTPUT=/opt/toolchain -j3
 
 FROM ubuntu:${UBUNTU_VERSION}
 
