@@ -28,14 +28,14 @@ aws s3 sync "${source_base_uri}/logs" "${destination_base_uri}/logs"
 aws s3 cp "${source_base_uri}/build" "${destination_base_uri}" --acl public-read --recursive --exclude "*" --include "*.tar.gz" --include "*.zip"
 
 # Sync build dirs for non-standard builds
-other_builds=("cgo" "fips-openssl-1.0" "fips-openssl-1.1")
+other_builds=("cgo" "build-fips")
 for build in ${other_builds[@]}; do
     aws s3 cp "${source_base_uri}/${build}" "${destination_base_uri}/${build}" --acl public-read --recursive --exclude "*" --include "*.txt" --include "*.tar.gz" --include "*.zip"
 done
 
 # download checksum files, concatenate them, and then upload the checksums file
 checksums_dir=$(mktemp -d)
-aws s3 cp "${source_base_uri}" "${checksums_dir}" --recursive --exclude "*" --include "build/*.txt" --include "cgo/*.txt" --include "fips*/*.txt"
+aws s3 cp "${source_base_uri}" "${checksums_dir}" --recursive --exclude "*" --include "build/*.txt" --include "cgo/*.txt" --include "build-fips/*.txt"
 checksums_file="${checksums_dir}/sensu-go_${3}_checksums.txt"
 for build in ${other_builds[@]}; do
     build_dir="${checksums_dir}/${build}"
