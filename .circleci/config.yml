@@ -22,6 +22,11 @@ workflows:
           tag: ${CIRCLE_TAG:-$CIRCLE_SHA1}-redhat8-builder
           dockerfile: dockerfiles/rhel8-builder/Dockerfile
       - docker/publish:
+          name: "rhel10-builder"
+          image: sensu/sensu-release
+          tag: ${CIRCLE_TAG:-$CIRCLE_SHA1}-redhat10-builder
+          dockerfile: dockerfiles/rhel10-builder/Dockerfile
+      - docker/publish:
           name: "packagecloud-pruner"
           image: sensu/sensu-release
           tag: ${CIRCLE_TAG:-$CIRCLE_SHA1}-packagecloud-pruner
