@@ -1,4 +1,4 @@
-FROM alpine:3.14.1
+FROM alpine:3.18.12
 
 LABEL name="sensu/sensu-release" \
       maintainer="engineering@sensu.io"
